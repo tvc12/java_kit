@@ -44,15 +44,19 @@ public abstract class Controller {
   }
 
   protected <T> void autoMapper(RoutingContext context, Resolver<T> resolver) {
-    T data = resolver.resolve();
-    if (data instanceof Future) {
-      futureToResponse(context, (Future<T>) data);
-    } else if (data instanceof Promise) {
-      futureToResponse(context, ((Promise<T>) data).future());
-    } else if (data instanceof Throwable) {
-      this.error(context, (Throwable) data);
-    } else {
-      this.send(context, data);
+    try {
+      T data = resolver.resolve();
+      if (data instanceof Future) {
+        futureToResponse(context, (Future<T>) data);
+      } else if (data instanceof Promise) {
+        futureToResponse(context, ((Promise<T>) data).future());
+      } else if (data instanceof Throwable) {
+        this.error(context, (Throwable) data);
+      } else {
+        this.send(context, data);
+      }
+    } catch (Throwable ex) {
+      this.error(context, ex);
     }
   }
 
