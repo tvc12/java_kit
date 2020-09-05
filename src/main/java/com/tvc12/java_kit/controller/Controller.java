@@ -13,8 +13,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public abstract class Controller {
-  public abstract String getCurrentPath();
-
   public abstract void configure(Router router);
 
   protected <T> AppResponse<T> toResponse(T data) {
@@ -29,10 +27,10 @@ public abstract class Controller {
       res = toResponse(data);
     }
     String json = Json.encode(res);
-    this.configResponse(context, HttpResponseStatus.OK).end(json);
+    Controller.configResponse(context, HttpResponseStatus.OK).end(json);
   }
 
-  public static  <T> void error(RoutingContext context, Throwable exception) {
+  public static <T> void error(RoutingContext context, Throwable exception) {
     ErrorResponse res;
     if (exception instanceof AppException) {
       res = ((AppException) exception).toResponse();
@@ -40,7 +38,7 @@ public abstract class Controller {
       res = AppException.from(exception).toResponse();
     }
     String json = Json.encode(res);
-    configResponse(context, res.httpStatus).end(json);
+    Controller.configResponse(context, res.httpStatus).end(json);
   }
 
   protected <T> void autoMapper(RoutingContext context, Resolver<T> resolver) {
@@ -51,18 +49,18 @@ public abstract class Controller {
       } else if (data instanceof Promise) {
         futureToResponse(context, ((Promise<T>) data).future());
       } else if (data instanceof Throwable) {
-        this.error(context, (Throwable) data);
+        Controller.error(context, (Throwable) data);
       } else {
         this.send(context, data);
       }
     } catch (Throwable ex) {
-      this.error(context, ex);
+      Controller.error(context, ex);
     }
   }
 
   private <T> void futureToResponse(RoutingContext context, Future<T> future) {
     future.onSuccess(r -> this.send(context, r))
-      .onFailure(ex -> this.error(context, ex));
+      .onFailure(ex -> Controller.error(context, ex));
   }
 
   static private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {

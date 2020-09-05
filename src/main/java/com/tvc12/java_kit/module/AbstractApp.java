@@ -12,7 +12,11 @@ import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public abstract class AbstractApp extends AbstractVerticle {
+  protected Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
   public Injector injector;
 
@@ -20,21 +24,19 @@ public abstract class AbstractApp extends AbstractVerticle {
 
   protected Router initRoute() {
     Router router = Router.router(vertx);
-    router.route().handler(CorsFilter.build());
-    router.route().handler(BodyHandler.create());
-    router.route().consumes("application/json");
-    router.route().produces("application/json");
-
-    router.route().failureHandler(context -> {
-      Throwable ex = context.failure();
-      Controller.error(context, ex);
-    });
-
-    router.route().handler(ctx -> {
-      ctx.response()
-        .putHeader("Content-Type", "application/json; charset=utf-8");
-      ctx.next();
-    });
+    router.route()
+      .handler(CorsFilter.build())
+      .handler(BodyHandler.create())
+      .consumes("application/json")
+      .produces("application/json")
+      .handler(ctx -> {
+        ctx.response().putHeader("Content-Type", "application/json; charset=utf-8");
+        ctx.next();
+      })
+      .failureHandler(context -> {
+        Throwable ex = context.failure();
+        Controller.error(context, ex);
+      });
     return router;
   }
 
@@ -69,6 +71,9 @@ public abstract class AbstractApp extends AbstractVerticle {
     this.injector = initModules();
     Router router = initRoute();
     setupRouter(router);
+    router.getRoutes().forEach(route -> {
+      logger.log(Level.INFO, String.format("register:: route:: %s Methods:: %s", route.getPath(), route.methods()));
+    });
 
     vertx.createHttpServer().requestHandler(router).listen(8888, http -> {
       if (http.succeeded()) {

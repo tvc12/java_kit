@@ -1,27 +1,35 @@
 package com.tvc12.java_kit.controller;
 
 import com.google.inject.Inject;
-import com.tvc12.java_kit.domain.exception.AppException;
+import com.google.inject.Singleton;
 import com.tvc12.java_kit.domain.model.Cat;
 import com.tvc12.java_kit.service.CatService;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Future;
+
+@Singleton
 public class CatController extends Controller {
+  private String path = "/api/cat";
   @Inject
   private CatService catService;
 
   @Override
-  public String getCurrentPath() {
-    return "/api/cat";
+  public void configure(Router router) {
+    router.get(path).handler(this::handleHelloWord);
+    router.get(String.format("%s/:id", path)).handler(this::handleGetCat);
+    router.post(path).handler(this::handleAddCat);
   }
 
-  @Override
-  public void configure(Router router) {
-    router.get("/:id").handler(this::handleGetCat);
-    router.post("/").handler(this::handleAddCat);
+  private void handleHelloWord(RoutingContext context) {
+    this.autoMapper(context, () -> {
+      Map<String, String> map = new HashMap<>();
+      map.put("query", "Xin Chao \uD83D\uDE0D\uD83D\uDE0D");
+      return map;
+    });
   }
 
   private void handleAddCat(RoutingContext context) {
