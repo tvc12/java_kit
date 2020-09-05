@@ -1,42 +1,19 @@
 package com.tvc12.java_kit;
 
-import com.tvc12.java_kit.controller.Controller;
-import com.tvc12.java_kit.controller.filter.CorsFilter;
-import com.tvc12.java_kit.domain.exception.NotFoundException;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
+import com.google.inject.Module;
+import com.tvc12.java_kit.module.AbstractApp;
+import com.tvc12.java_kit.module.MainModule;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 
-public class MainVerticle extends AbstractVerticle {
+public class MainVerticle extends AbstractApp {
 
   @Override
-  public void start(Promise<Void> startPromise) throws Exception {
-    Router router = Router.router(vertx);
-    router.route()
-      .handler(CorsFilter.build())
-      .handler(BodyHandler.create())
-      .consumes("application/json")
-      .produces("application/json");
-    router.route().failureHandler(context -> {
-      Throwable ex = context.failure();
-      Controller.error(context, ex);
-    });
-    router.route().handler(context -> {
-      context.fail(new NotFoundException());
-      context.response()
-        .putHeader("content-type", "application/json")
-        .end("{\"text\": \"Hello from Vert.x!\"}");
-    });
+  protected Module[] modules() {
+    return new Module[]{new MainModule()};
+  }
 
+  @Override
+  protected void setupRouter(Router router) {
 
-    vertx.createHttpServer().requestHandler(router).listen(8888, http -> {
-      if (http.succeeded()) {
-        startPromise.complete();
-        System.out.println("HTTP server started on port 8888");
-      } else {
-        startPromise.fail(http.cause());
-      }
-    });
   }
 }
