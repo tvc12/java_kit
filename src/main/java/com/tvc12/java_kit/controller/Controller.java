@@ -8,11 +8,17 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.parsetools.JsonParser;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public abstract class Controller {
+  private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+
   public abstract void configure(Router router);
 
   protected <T> AppResponse<T> toResponse(T data) {
@@ -26,8 +32,10 @@ public abstract class Controller {
     } else {
       res = toResponse(data);
     }
-    String json = Json.encode(res);
-    Controller.configResponse(context, HttpResponseStatus.OK).end(json);
+    logger.info(String.format("\t\tsend:: %s", res.toString()));
+    String json = JsonObject.mapFrom(res).encode();
+    logger.info(String.format("\t\tsend::json:: %s", json));
+    context.response().end(json);
   }
 
   public static <T> void error(RoutingContext context, Throwable exception) {
@@ -42,15 +50,21 @@ public abstract class Controller {
   }
 
   protected <T> void autoMapper(RoutingContext context, Resolver<T> resolver) {
+    logger.info(String.format("autoMapper:: %s", context.currentRoute().getPath()));
     try {
       T data = resolver.resolve();
       if (data instanceof Future) {
+        logger.debug("\t\t autoMapper:: Future");
         futureToResponse(context, (Future<T>) data);
       } else if (data instanceof Promise) {
+        logger.debug("\t\t autoMapper:: Promise");
         futureToResponse(context, ((Promise<T>) data).future());
       } else if (data instanceof Throwable) {
+        logger.debug("\t\t autoMapper:: Throwable");
+
         Controller.error(context, (Throwable) data);
       } else {
+        logger.info(String.format("\t\t autoMapper:: Can't mapped:: %s", data.toString()));
         this.send(context, data);
       }
     } catch (Throwable ex) {
@@ -65,8 +79,7 @@ public abstract class Controller {
 
   static private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {
     return context.response()
-      .setStatusCode(status.code())
-      .putHeader("content-type", "application/json; charset=utf-8");
+      .setStatusCode(status.code());
   }
 
 }

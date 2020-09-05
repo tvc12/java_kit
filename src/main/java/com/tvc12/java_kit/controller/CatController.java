@@ -4,12 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.tvc12.java_kit.domain.model.Cat;
 import com.tvc12.java_kit.service.CatService;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 @Singleton
 public class CatController extends Controller {
@@ -26,7 +26,7 @@ public class CatController extends Controller {
 
   private void handleHelloWord(RoutingContext context) {
     this.autoMapper(context, () -> {
-      Map<String, String> map = new HashMap<>();
+      JsonObject map = new JsonObject();
       map.put("query", "Xin Chao \uD83D\uDE0D\uD83D\uDE0D");
       return map;
     });

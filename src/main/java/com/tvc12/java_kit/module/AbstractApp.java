@@ -9,20 +9,21 @@ import com.tvc12.java_kit.controller.Controller;
 import com.tvc12.java_kit.controller.filter.CorsFilter;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AbstractApp extends AbstractVerticle {
-  protected Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+  protected Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
   public Injector injector;
 
   protected abstract Module[] modules();
 
-  protected Router initRoute() {
+  protected Router initRoute(Vertx vertx) {
     Router router = Router.router(vertx);
     router.route()
       .handler(CorsFilter.build())
@@ -68,17 +69,18 @@ public abstract class AbstractApp extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
+    Vertx vertx = this.getVertx();
     this.injector = initModules();
-    Router router = initRoute();
+    Router router = initRoute(vertx);
     setupRouter(router);
     router.getRoutes().forEach(route -> {
-      logger.log(Level.INFO, String.format("register:: route:: %s Methods:: %s", route.getPath(), route.methods()));
+      logger.info(String.format("register:: route:: %s Methods:: %s", route.getPath(), route.methods()));
     });
 
     vertx.createHttpServer().requestHandler(router).listen(8888, http -> {
       if (http.succeeded()) {
         startPromise.complete();
-        System.out.println("HTTP server started on port 8888");
+        logger.info("HTTP server started on port 8888");
       } else {
         startPromise.fail(http.cause());
       }

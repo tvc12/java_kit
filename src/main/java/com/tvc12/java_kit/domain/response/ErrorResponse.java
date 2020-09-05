@@ -5,11 +5,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class ErrorResponse {
+  @JsonProperty
   public String error;
 
   @JsonIgnore
   public HttpResponseStatus httpStatus;
 
+  @JsonProperty
   public Object data;
 
   @JsonProperty("error_msg")
