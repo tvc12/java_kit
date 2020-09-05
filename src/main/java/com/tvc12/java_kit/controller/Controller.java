@@ -29,10 +29,10 @@ public abstract class Controller {
       res = toResponse(data);
     }
     String json = Json.encode(res);
-    this.configResponse(context, HttpResponseStatus.OK).write(json);
+    this.configResponse(context, HttpResponseStatus.OK).end(json);
   }
 
-  protected <T> void error(RoutingContext context, Throwable exception) {
+  public static  <T> void error(RoutingContext context, Throwable exception) {
     ErrorResponse res;
     if (exception instanceof AppException) {
       res = ((AppException) exception).toResponse();
@@ -40,7 +40,7 @@ public abstract class Controller {
       res = AppException.from(exception).toResponse();
     }
     String json = Json.encode(res);
-    this.configResponse(context, res.httpStatus).write(json);
+    configResponse(context, res.httpStatus).end(json);
   }
 
   protected <T> void autoMapper(RoutingContext context, Resolver<T> resolver) {
@@ -65,7 +65,7 @@ public abstract class Controller {
       .onFailure(ex -> this.error(context, ex));
   }
 
-  private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {
+  static private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {
     return context.response()
       .setStatusCode(status.code())
       .putHeader("content-type", "application/json; charset=utf-8");
