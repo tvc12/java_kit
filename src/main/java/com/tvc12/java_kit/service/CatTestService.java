@@ -7,13 +7,13 @@ import io.vertx.core.Future;
 public class CatTestService implements CatService {
 
   @Override
-  public Future<Cat> get(String id) throws AppException {
+  public Future<Cat> get(String id) {
     Cat cat = new Cat(id, "Kitty", 12, "Mety");
     return Future.succeededFuture(cat);
   }
 
   @Override
-  public Future<Cat> add(Cat cat) throws AppException {
+  public Future<Cat> add(Cat cat) {
     return Future.succeededFuture(cat);
   }
 }

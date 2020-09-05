@@ -12,7 +12,7 @@ public class CatCachedService implements CatService {
   private CacheService<String, Cat> cache;
 
   @Override
-  public Future<Cat> get(String id) throws AppException {
+  public Future<Cat> get(String id) {
     Cat cat = cache.get(id);
     if (cat != null) {
       return Future.succeededFuture(cat);
@@ -22,7 +22,7 @@ public class CatCachedService implements CatService {
   }
 
   @Override
-  public Future<Cat> add(Cat cat) throws AppException {
+  public Future<Cat> add(Cat cat) {
     boolean success = cache.put(cat.id, cat);
     if (success) {
       return Future.succeededFuture(cat);

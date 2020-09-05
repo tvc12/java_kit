@@ -41,6 +41,10 @@ public abstract class AppException extends Exception {
     this.status = status;
   }
 
+  public static AppException from(Throwable exception) {
+    return new InternalErrorException(exception.getMessage());
+  }
+
   public ErrorResponse toResponse() {
     return new ErrorResponse(error, status, null, message);
   }
