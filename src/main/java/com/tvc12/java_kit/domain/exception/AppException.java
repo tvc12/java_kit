@@ -44,4 +44,7 @@ public abstract class AppException extends Exception {
   public ErrorResponse toResponse() {
     return new ErrorResponse(error, status, null, message);
   }
+
+  static final String NOT_FOUND = "not_found";
+  static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 }
