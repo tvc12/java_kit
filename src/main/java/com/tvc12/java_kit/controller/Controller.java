@@ -1,5 +1,6 @@
 package com.tvc12.java_kit.controller;
 
+import com.tvc12.java_kit.domain.Resolver;
 import com.tvc12.java_kit.domain.exception.AppException;
 import com.tvc12.java_kit.domain.response.AppResponse;
 import com.tvc12.java_kit.domain.response.ErrorResponse;
@@ -84,6 +85,3 @@ public abstract class Controller {
 
 }
 
-interface Resolver<T> {
-  T resolve();
-}
