@@ -2,6 +2,19 @@
 
 ![](https://img.shields.io/badge/vert.x-4.0.0.Beta1-purple.svg)
 
+### Features
+
+- [x] Vertx
+- [x] Guice
+- [x] Jackson
+- [ ] Shiro Auth
+- [ ] Hibernate
+- [ ] PostgreSQL
+- [x] Docker
+- [ ] CI/CD
+- [ ] Hot-reload
+- [ ] Swagger
+
 ### Building
 
 To launch your tests:
