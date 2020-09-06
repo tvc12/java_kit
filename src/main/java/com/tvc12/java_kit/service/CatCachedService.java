@@ -26,7 +26,7 @@ public class CatCachedService implements CatService {
     if (success) {
       return Future.succeededFuture(cat);
     } else {
-      return Future.failedFuture(new InternalErrorException());
+      return Future.failedFuture(new InternalErrorException("Cat existed"));
     }
   }
 }

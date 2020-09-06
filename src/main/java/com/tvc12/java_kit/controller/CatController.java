@@ -30,6 +30,8 @@ public class CatController extends Controller {
   }
 
   private void handleAddCat(RoutingContext context) {
+    System.out.println("handleAddCat::");
+    System.out.println(context.getBodyAsJson().toString());
     Cat cat = context.getBodyAsJson().mapTo(Cat.class);
     this.autoMapper(context, () -> this.catService.add(cat));
   }
