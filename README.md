@@ -27,19 +27,20 @@ To run your application:
 docker-compose up -d
 ```
 
-
-### Route for test
-
 ```
 curl -X GET "localhost:12128/api/cat"
 ```
-response
 
 ```
+# response
 {
 	"success": true,
 	"data": {
 		"query": "Xin Chao 😍😍"
 	}
 }
+
 ```
+#### License
+
+Project under the [Vertx License](https://vertx.io/) and [MIT LICENSE](LICENSE)

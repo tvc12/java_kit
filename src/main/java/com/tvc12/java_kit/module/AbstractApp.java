@@ -29,7 +29,7 @@ public abstract class AbstractApp extends AbstractVerticle {
   protected Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
   protected int port;
 
-  AbstractApp() {
+  public AbstractApp() {
     String rawPort = System.getenv("PORT");
     if (rawPort != null)
       this.port = Integer.parseInt(rawPort);
