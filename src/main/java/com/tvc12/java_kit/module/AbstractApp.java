@@ -1,5 +1,9 @@
 package com.tvc12.java_kit.module;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -13,6 +17,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -49,6 +54,21 @@ public abstract class AbstractApp extends AbstractVerticle {
     return router;
   }
 
+  protected void setupJson() {
+    ObjectMapper mapper = DatabindCodec.mapper();
+    ObjectMapper prettyMapper = DatabindCodec.prettyMapper();
+    configMapper(prettyMapper);
+    configMapper(mapper);
+  }
+
+  protected void configMapper(ObjectMapper mapper) {
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
   protected abstract void setupRouter(Router router);
 
   protected Module overrideModule(Module[] modules) {
@@ -80,6 +100,7 @@ public abstract class AbstractApp extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     this.injector = initModules();
+    setupJson();
     Router router = initRoute(vertx);
     setupRouter(router);
 
