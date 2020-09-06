@@ -25,8 +25,18 @@ import io.vertx.ext.web.sstore.SessionStore;
 
 
 public abstract class AbstractApp extends AbstractVerticle {
-  public Injector injector;
+  protected Injector injector;
   protected Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+  protected int port;
+
+  AbstractApp() {
+    String rawPort = System.getenv("PORT");
+    if (rawPort != null)
+      this.port = Integer.parseInt(rawPort);
+    else {
+      this.port = 12128;
+    }
+  }
 
   protected abstract Module[] modules();
 
@@ -108,10 +118,10 @@ public abstract class AbstractApp extends AbstractVerticle {
       logger.info(String.format("register:: route:: %s Methods:: %s", route.getPath(), route.methods()));
     });
 
-    vertx.createHttpServer().requestHandler(router).listen(8888, http -> {
+    vertx.createHttpServer().requestHandler(router).listen(port, http -> {
       if (http.succeeded()) {
         startPromise.complete();
-        logger.info("HTTP server started on port 8888");
+        logger.info(String.format("HTTP server started on port %s", port));
       } else {
         startPromise.fail(http.cause());
       }

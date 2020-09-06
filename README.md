@@ -18,3 +18,28 @@ To run your application:
 ```
 ./mvnw clean compile exec:java
 ```
+
+⚠ Default port: **12128**
+
+### Use docker
+
+```
+docker-compose up -d
+```
+
+
+### Route for test
+
+```
+curl -X GET "localhost:12128/api/cat"
+```
+response
+
+```
+{
+	"success": true,
+	"data": {
+		"query": "Xin Chao 😍😍"
+	}
+}
+```

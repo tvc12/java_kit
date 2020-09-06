@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  java_kit:
+    container_name: java_kit
+    build: .
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 30s
+    ports:
+      - 12128:12128
+    networks:
+      - java_kit
+networks:
+  java_kit:
+
+volumes:
+  java_kit:
