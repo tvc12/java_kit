@@ -1,20 +1,16 @@
 package com.tvc12.java_kit.domain.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 public class ErrorResponse {
-  @JsonProperty
   public String error;
 
   @JsonIgnore
   public HttpResponseStatus httpStatus;
 
-  @JsonProperty
   public Object data;
 
-  @JsonProperty("error_msg")
   public String errorMsg;
 
   public ErrorResponse(String error, HttpResponseStatus httpStatus, Object data, String errorMsg) {

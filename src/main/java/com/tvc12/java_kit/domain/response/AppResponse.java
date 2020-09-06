@@ -1,12 +1,8 @@
 package com.tvc12.java_kit.domain.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 public class AppResponse<T> {
-  @JsonProperty
   public boolean success;
 
-  @JsonProperty
   public T data;
 
   public AppResponse(boolean success, T data) {

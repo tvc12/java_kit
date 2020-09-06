@@ -8,6 +8,6 @@ public class NotFoundException extends AppException {
   }
 
   public NotFoundException() {
-    super(AppException.NOT_FOUND, "", HttpResponseStatus.NOT_FOUND);
+    super(AppException.NOT_FOUND, "Item isn't exists", HttpResponseStatus.NOT_FOUND);
   }
 }

@@ -1,6 +1,6 @@
 package com.tvc12.java_kit.domain.model;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Cat {
   public String id;

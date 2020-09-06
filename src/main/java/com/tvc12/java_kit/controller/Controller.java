@@ -12,13 +12,28 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.parsetools.JsonParser;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public abstract class Controller {
-  private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+
+  public static <T> void error(RoutingContext context, Throwable exception) {
+    System.out.println(String.format("Controller::error:: %s", exception.getMessage()));
+    ErrorResponse res;
+    if (exception instanceof AppException) {
+      res = ((AppException) exception).toResponse();
+    } else {
+      res = AppException.from(exception).toResponse();
+    }
+    String json = Json.encode(res);
+    Controller.configResponse(context, res.httpStatus).end(json);
+  }
+
+  static private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {
+    return context.response()
+      .setStatusCode(status.code());
+  }
 
   public abstract void configure(Router router);
 
@@ -33,21 +48,8 @@ public abstract class Controller {
     } else {
       res = toResponse(data);
     }
-    logger.info(String.format("\t\tsend:: %s", res.toString()));
-    String json = JsonObject.mapFrom(res).encode();
-    logger.info(String.format("\t\tsend::json:: %s", json));
-    context.response().end(json);
-  }
-
-  public static <T> void error(RoutingContext context, Throwable exception) {
-    ErrorResponse res;
-    if (exception instanceof AppException) {
-      res = ((AppException) exception).toResponse();
-    } else {
-      res = AppException.from(exception).toResponse();
-    }
     String json = Json.encode(res);
-    Controller.configResponse(context, res.httpStatus).end(json);
+    context.response().end(json);
   }
 
   protected <T> void autoMapper(RoutingContext context, Resolver<T> resolver) {
@@ -55,17 +57,17 @@ public abstract class Controller {
     try {
       T data = resolver.resolve();
       if (data instanceof Future) {
-        logger.debug("\t\t autoMapper:: Future");
+        logger.info("\t\t autoMapper:: Future");
         futureToResponse(context, (Future<T>) data);
       } else if (data instanceof Promise) {
-        logger.debug("\t\t autoMapper:: Promise");
+        logger.info("\t\t autoMapper:: Promise");
         futureToResponse(context, ((Promise<T>) data).future());
       } else if (data instanceof Throwable) {
-        logger.debug("\t\t autoMapper:: Throwable");
+        logger.info("\t\t autoMapper:: Throwable");
 
         Controller.error(context, (Throwable) data);
       } else {
-        logger.info(String.format("\t\t autoMapper:: Can't mapped:: %s", data.toString()));
+        logger.info("\t\t autoMapper:: Raw data");
         this.send(context, data);
       }
     } catch (Throwable ex) {
@@ -77,11 +79,5 @@ public abstract class Controller {
     future.onSuccess(r -> this.send(context, r))
       .onFailure(ex -> Controller.error(context, ex));
   }
-
-  static private HttpServerResponse configResponse(RoutingContext context, HttpResponseStatus status) {
-    return context.response()
-      .setStatusCode(status.code());
-  }
-
 }
 

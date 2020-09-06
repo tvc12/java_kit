@@ -7,6 +7,7 @@ import com.google.inject.Stage;
 import com.google.inject.util.Modules;
 import com.tvc12.java_kit.controller.Controller;
 import com.tvc12.java_kit.controller.filter.CorsFilter;
+import com.tvc12.java_kit.domain.exception.NotFoundException;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -14,29 +15,36 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.SessionHandler;
+import io.vertx.ext.web.sstore.SessionStore;
 
 
 public abstract class AbstractApp extends AbstractVerticle {
-  protected Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
-
   public Injector injector;
+  protected Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
   protected abstract Module[] modules();
 
   protected Router initRoute(Vertx vertx) {
     Router router = Router.router(vertx);
+
     router.route()
       .handler(CorsFilter.build())
+//      .handler(StaticHandler.create())
       .handler(BodyHandler.create())
-      .consumes("application/json")
-      .produces("application/json")
-      .handler(ctx -> {
-        ctx.response().putHeader("Content-Type", "application/json; charset=utf-8");
-        ctx.next();
-      })
+      .handler(SessionHandler.create(SessionStore.create(vertx)))
       .failureHandler(context -> {
         Throwable ex = context.failure();
-        Controller.error(context, ex);
+        if (ex instanceof NoSuchMethodError) {
+          Controller.error(context, new NotFoundException("Route isn't exists"));
+        } else {
+          Controller.error(context, ex);
+        }
+      })
+      .handler(ctx -> {
+        logger.error("initRoute::handler");
+        ctx.response().putHeader("Content-Type", "application/json; charset=utf-8");
+        ctx.next();
       });
     return router;
   }
@@ -56,7 +64,9 @@ public abstract class AbstractApp extends AbstractVerticle {
   private Injector initModules() {
     Stage stage = this.getStage(System.getenv("MODE"));
     Module[] modules = new Module[]{overrideModule(modules())};
-    return Guice.createInjector(stage, modules);
+    Injector injector = Guice.createInjector(stage, modules);
+    injector.injectMembers(this);
+    return injector;
   }
 
   private Stage getStage(String mode) {
@@ -69,10 +79,10 @@ public abstract class AbstractApp extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
-    Vertx vertx = this.getVertx();
     this.injector = initModules();
     Router router = initRoute(vertx);
     setupRouter(router);
+
     router.getRoutes().forEach(route -> {
       logger.info(String.format("register:: route:: %s Methods:: %s", route.getPath(), route.methods()));
     });

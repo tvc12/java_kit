@@ -8,12 +8,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Singleton
 public class CatController extends Controller {
-  private String path = "/api/cat";
+  private final String path = "/api/cat";
   @Inject
   private CatService catService;
 

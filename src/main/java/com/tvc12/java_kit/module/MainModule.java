@@ -1,7 +1,6 @@
 package com.tvc12.java_kit.module;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.tvc12.java_kit.domain.model.Cat;
