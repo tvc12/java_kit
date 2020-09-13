@@ -8,8 +8,8 @@
 - [x] Guice
 - [x] Jackson
 - [ ] Shiro Auth
-- [ ] Hibernate
-- [ ] PostgreSQL
+- [x] Hibernate
+- [x] PostgreSQL
 - [x] Docker
 - [ ] CI/CD
 - [ ] Hot-reload
