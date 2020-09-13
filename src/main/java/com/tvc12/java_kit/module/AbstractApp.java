@@ -97,7 +97,6 @@ public abstract class AbstractApp extends AbstractVerticle {
     Module[] modules = new Module[]{overrideModule(modules())};
     Injector injector = Guice.createInjector(stage, modules);
     injector.injectMembers(this);
-    injector.getInstance(PersistService.class).start();
     return injector;
   }
 
@@ -128,11 +127,5 @@ public abstract class AbstractApp extends AbstractVerticle {
         startPromise.fail(http.cause());
       }
     });
-  }
-
-  @Override
-  public void stop() throws Exception {
-    injector.getInstance(PersistService.class).stop();
-    super.stop();
   }
 }

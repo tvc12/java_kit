@@ -11,8 +11,8 @@ public class MainVerticle extends AbstractApp {
   @Override
   protected Module[] modules() {
     return new Module[]{
-      new MainModule(),
       new HibernateModule(),
+      new MainModule(),
     };
   }
 
