@@ -14,8 +14,23 @@ services:
       - 12128:12128
     networks:
       - java_kit
+  java_kit_db:
+    image: postgres:10.3
+    container_name: java_kit_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=java_kit_db
+      - POSTGRES_USER=java_kit
+      - POSTGRES_PASSWORD=java_kit
+    volumes:
+      - java_kit_db:/var/lib/postgresql/data
+    networks:
+      - java_kit
+
 networks:
   java_kit:
 
 volumes:
-  java_kit:
+  java_kit_db:
