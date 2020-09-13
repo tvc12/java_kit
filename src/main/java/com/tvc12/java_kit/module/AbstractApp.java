@@ -8,6 +8,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.persist.PersistService;
 import com.google.inject.util.Modules;
 import com.tvc12.java_kit.controller.Controller;
 import com.tvc12.java_kit.controller.filter.CorsFilter;
@@ -85,7 +86,7 @@ public abstract class AbstractApp extends AbstractVerticle {
     if (modules.length == 1) return modules[0];
     Module module = modules[0];
     for (int i = 1; i < modules.length; ++i) {
-      Module m = modules[0];
+      Module m = modules[i];
       module = Modules.override(module).with(m);
     }
     return module;
@@ -96,6 +97,7 @@ public abstract class AbstractApp extends AbstractVerticle {
     Module[] modules = new Module[]{overrideModule(modules())};
     Injector injector = Guice.createInjector(stage, modules);
     injector.injectMembers(this);
+    injector.getInstance(PersistService.class).start();
     return injector;
   }
 
@@ -126,5 +128,11 @@ public abstract class AbstractApp extends AbstractVerticle {
         startPromise.fail(http.cause());
       }
     });
+  }
+
+  @Override
+  public void stop() throws Exception {
+    injector.getInstance(PersistService.class).stop();
+    super.stop();
   }
 }

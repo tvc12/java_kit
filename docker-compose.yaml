@@ -10,6 +10,12 @@ services:
         delay: 5s
         max_attempts: 3
         window: 30s
+    environment:
+      - DB_CONNECTION_URL=jdbc:postgresql://localhost:5432/java_kit_db
+      - DB_USERNAME=java_kit
+      - DB_PASSWORD=java_kit
+    depends_on:
+      - java_kit_db
     ports:
       - 12128:12128
     networks:
