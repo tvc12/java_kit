@@ -8,7 +8,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.google.inject.persist.PersistService;
 import com.google.inject.util.Modules;
 import com.tvc12.java_kit.controller.Controller;
 import com.tvc12.java_kit.controller.filter.CorsFilter;
@@ -94,7 +93,10 @@ public abstract class AbstractApp extends AbstractVerticle {
 
   private Injector initModules() {
     Stage stage = this.getStage(System.getenv("MODE"));
-    Module[] modules = new Module[]{overrideModule(modules())};
+    Module[] modules = new Module[]{
+      new VertxModule(vertx),
+      overrideModule(modules())
+    };
     Injector injector = Guice.createInjector(stage, modules);
     injector.injectMembers(this);
     return injector;
