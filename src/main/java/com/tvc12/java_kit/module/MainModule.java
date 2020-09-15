@@ -8,9 +8,14 @@ import com.tvc12.java_kit.service.*;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.shiro.PropertiesProviderConstants;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import io.vertx.ext.auth.shiro.impl.PropertiesAuthProvider;
+import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.realm.Realm;
 
 public class MainModule extends AbstractModule {
   @Override
@@ -27,13 +32,23 @@ public class MainModule extends AbstractModule {
     return new InMemoryCacheService<String, Cat>();
   }
 
+  @Provides
+  @Singleton
+  Realm providesRealm() {
+    JsonObject config = new JsonObject().put(PropertiesProviderConstants.PROPERTIES_PROPS_PATH_FIELD, "classpath:test-auth.properties");
+    final ShiroAuthOptions options = new ShiroAuthOptions().setType(ShiroAuthRealmType.PROPERTIES).setConfig(config);
+    return PropertiesAuthProvider.createRealm(options.getConfig());
+  }
 
   @Provides
   @Singleton
-  AuthenticationProvider providesAuthenProvider(Vertx vertx) {
-    JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties");
-    return ShiroAuth.create(vertx, new ShiroAuthOptions()
-      .setType(ShiroAuthRealmType.PROPERTIES)
-      .setConfig(config));
+  SecurityManager providesSecurityManager(Realm realm) {
+    return new DefaultSecurityManager(realm);
+  }
+
+  @Provides
+  @Singleton
+  AuthenticationProvider providesAuthenProvider(Vertx vertx, Realm realm) {
+    return ShiroAuth.create(vertx, realm);
   }
 }
