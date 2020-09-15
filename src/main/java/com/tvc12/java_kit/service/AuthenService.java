@@ -1,11 +1,11 @@
 package com.tvc12.java_kit.service;
 
-import com.tvc12.java_kit.domain.exception.AppException;
+import java.util.concurrent.Future;
 
 public interface AuthenService {
-  String login(String user, String password, boolean rememberMe, long sessionTimeout) throws AppException;
+  Future<String> login(String user, String password, boolean rememberMe, long sessionTimeout);
 
-  void logout(String sessionId) throws AppException;
+  Future<Boolean> logout(String sessionId);
 
-  String getUser(String sessionId) throws AppException;
+  Future<String> getUser(String sessionId);
 }
