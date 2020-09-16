@@ -2,6 +2,7 @@ package com.tvc12.java_kit.controller;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.tvc12.java_kit.controller.filter.LoggedFilter;
 import com.tvc12.java_kit.domain.model.Cat;
 import com.tvc12.java_kit.service.CatService;
 import io.vertx.core.json.JsonObject;
@@ -14,10 +15,12 @@ public class CatController extends Controller {
   @Inject
   private CatService catService;
 
+  @Inject LoggedFilter loggedFilter;
+
   @Override
   public void configure(Router router) {
     router.get(path).handler(this::handleHelloWord);
-    router.get(String.format("%s/:id", path)).handler(this::handleGetCat);
+    router.get(String.format("%s/:id", path)).handler(loggedFilter::checkLogin).handler(this::handleGetCat);
     router.post(path).handler(this::handleAddCat);
   }
 

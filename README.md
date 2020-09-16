@@ -7,13 +7,10 @@
 - [x] Vertx
 - [x] Guice
 - [x] Jackson
-- [ ] Shiro Auth
+- [x] Shiro Auth
 - [x] Hibernate
 - [x] PostgreSQL
 - [x] Docker
-- [ ] CI/CD
-- [ ] Hot-reload
-- [ ] Swagger
 
 ### Building
 

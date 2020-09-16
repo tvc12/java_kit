@@ -6,7 +6,9 @@ import com.tvc12.java_kit.domain.exception.NotFoundException;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
+import io.vertx.ext.auth.shiro.impl.ShiroUser;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 
@@ -14,16 +16,21 @@ public class AuthenServiceImpl implements AuthenService {
   @Inject
   private Provider<AuthenticationProvider> authenticationProvider;
 
+  @Inject
+  private SecurityManager securityManager;
+
   @Override
   public Future<String> login(String user, String password, boolean rememberMe, long sessionTimeout) {
     if (isLoginSuccess(user, password)) {
       // can put user info to object
       JsonObject authInfo = new JsonObject()
         .put("username", user)
-        .put("password", password)
-        .put("user_id", "10000412345");
+        .put("password", password);
       return authenticationProvider.get().authenticate(authInfo).map((newData) -> {
-        Session session = SecurityUtils.getSubject().getSession(true);
+        Subject subject = SecurityUtils.getSubject();
+
+        System.out.println(String.format("authenticate:: %s", newData.principal()));
+        Session session = subject.getSession(true);
         session.touch();
         return session.getId().toString();
       });
@@ -45,8 +52,18 @@ public class AuthenServiceImpl implements AuthenService {
 
   @Override
   public Future<String> getUser(String sessionId) {
-    final Session session = new Subject.Builder().sessionId(sessionId).buildSubject().getSession(false);
-    final String username = session.getAttribute("user_id").toString();
+    final Subject currentUser = new Subject.Builder(this.securityManager).sessionId(sessionId).buildSubject();
+    if (currentUser == null || !currentUser.isAuthenticated()) {
+      return Future.failedFuture(new NotFoundException("Session not found"));
+    }
+    final Session session = currentUser.getSession(false);
+
+    if (session != null) {
+      session.touch();
+    }
+    System.out.println("getUser::4");
+    final String username = currentUser.getPrincipal().toString();
+    System.out.println(String.format("getUser:: %s", username));
     return Future.succeededFuture(username);
   }
 }
