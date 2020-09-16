@@ -94,8 +94,9 @@ public abstract class AbstractApp extends AbstractVerticle {
   private Injector initModules() {
     Stage stage = this.getStage(System.getenv("MODE"));
     Module[] modules = new Module[]{
+      new HibernateModule(),
       new VertxModule(vertx),
-      overrideModule(modules())
+      overrideModule(modules()),
     };
     Injector injector = Guice.createInjector(stage, modules);
     injector.injectMembers(this);

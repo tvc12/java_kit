@@ -1,21 +1,18 @@
 package com.tvc12.java_kit.service;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.tvc12.java_kit.domain.exception.NotFoundException;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 
 public class AuthenServiceImpl implements AuthenService {
   @Inject
-  AuthenticationProvider authenticationProvider;
-
-  @Inject
-  SecurityManager securityManager;
+  private Provider<AuthenticationProvider> authenticationProvider;
 
   @Override
   public Future<String> login(String user, String password, boolean rememberMe, long sessionTimeout) {
@@ -25,13 +22,13 @@ public class AuthenServiceImpl implements AuthenService {
         .put("username", user)
         .put("password", password)
         .put("user_id", "10000412345");
-      return authenticationProvider.authenticate(authInfo).map((newData) -> {
-        Session session = SecurityUtils.getSubject().getSession(false);
+      return authenticationProvider.get().authenticate(authInfo).map((newData) -> {
+        Session session = SecurityUtils.getSubject().getSession(true);
         session.touch();
         return session.getId().toString();
       });
     } else {
-      return Future.failedFuture(new NotFoundException());
+      return Future.failedFuture(new NotFoundException("Account not exists"));
     }
   }
 

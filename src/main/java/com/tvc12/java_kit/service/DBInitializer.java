@@ -8,7 +8,7 @@ import com.google.inject.persist.PersistService;
 public class DBInitializer {
   @Inject
   public DBInitializer(PersistService service) {
-    System.out.println("DBInitializer::");
+    System.out.println("DBInitializer::Running");
     service.start();
   }
 }
